@@ -3,7 +3,7 @@
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/axiosInstance"; 
-
+import Link from "next/link";
 type Joke = {
   id: string;
   title: string;
@@ -201,7 +201,7 @@ useEffect(() => {
             ) : (
               /* Display mode */
               <>
-                <div className="flex-1">
+                <Link href={`/joke/${joke.slug}`} className="flex-1">
                   <h3
                     className="font-semibold cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
                     onClick={() => router.push(`/joke/${joke.slug}`)}
@@ -214,7 +214,7 @@ useEffect(() => {
                   <p className="text-xs text-zinc-400 mt-1">
                     Slug: {joke.slug}
                   </p>
-                </div>
+                </Link>
                 <div className="flex gap-2 self-end sm:self-center">
                   <button
                     onClick={() => startEdit(joke)}
