@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
   const res = await fetch(`${BACKEND_URL}/auth/session`, {
     headers: { cookie: `accessToken=${accessToken}` },
     cache: "no-store",
+    credentials: 'include' 
   });
 
   if (!res.ok) {

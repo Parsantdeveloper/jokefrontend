@@ -10,6 +10,7 @@ async function getSession() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/session`, {
     headers: { cookie: `accessToken=${accessToken}` },
     cache: "no-store",
+    credentials: 'include' 
   });
 
   if (!res.ok) return null;
