@@ -1,37 +1,40 @@
+"use client";
 
-import {redirect} from "next/navigation";
-import {cookies} from "next/headers";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/axiosInstance";
 
-async function getSession() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  if (!accessToken) return null;
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [status, setStatus] = useState<"checking" | "ok">("checking");
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/session`, {
-    headers: { cookie: `accessToken=${accessToken}` },
-    cache: "no-store",
-    credentials: 'include' 
-  });
+  useEffect(() => {
+    let ignore = false;
 
-  if (!res.ok) return null;
-  const { data } = await res.json();
-  return data;
-}
+    api
+      .get("/auth/session")
+      .then(({ data }) => {
+        if (ignore) return;
+        if (data.data.role !== "ADMIN") {
+          router.replace("/unauthorized");
+        } else {
+          setStatus("ok");
+        }
+      })
+      .catch(() => {
+        if (!ignore) router.replace("/auth/login");
+      });
 
-export default async function AdminLayout({children}:{children:React.ReactNode}){
-   
-    const session = await getSession();
-    if (!session) {
-      redirect("/auth/login");
-    }
-    if (session.role !== "ADMIN") {
-      redirect("/unauthorized");
-    }
+    return () => {
+      ignore = true;
+    };
+  }, [router]);
 
-    return (
-      <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        {children}
-      </div>
-    );
+  if (status === "checking") return null;
 
+  return (
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+      {children}
+    </div>
+  );
 }
