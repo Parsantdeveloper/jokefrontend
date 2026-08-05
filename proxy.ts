@@ -13,7 +13,7 @@ export async function proxy(request: NextRequest) {
 
   // get session from backend to validate the access token and check the role
   const res = await fetch(`${BACKEND_URL}/auth/session`, {
-    // headers: { cookie: `accessToken=${accessToken}` },
+    headers: { cookie: `accessToken=${accessToken}` },
     cache: "no-store",
     credentials: 'include' 
   });
