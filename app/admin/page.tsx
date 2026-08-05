@@ -96,10 +96,10 @@ useEffect(() => {
   const handleUpdate = async (slug: string) => {
     if (!editTitle.trim() || !editContent.trim()) return;
     try {
-      await api.put(`/joke/${slug}`, {
-        title: editTitle,
-        content: editContent,
-      });
+       const payload:{title?: string; content?: string} = {};
+       if(title !== editTitle) payload['title'] = editTitle;
+       if(content !== editContent) payload['content'] = editContent;
+      await api.put(`/joke/${slug}`, payload);
       setEditingSlug(null);
       await fetchJokes();
     } catch (err) {

@@ -73,6 +73,7 @@ export default async function JokePage({ params }: PageProps) {
           {joke.content}
         </p>
         <div className="mt-6 text-sm text-zinc-500">Slug: {joke.slug}</div>
+        
       </article>
     </div>
   );
