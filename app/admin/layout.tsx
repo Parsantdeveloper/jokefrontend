@@ -8,7 +8,6 @@ async function getSession() {
   if (!accessToken) return null;
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/session`, {
-    headers: { cookie: `accessToken=${accessToken}` },
     cache: "no-store",
     credentials: 'include' 
   });
