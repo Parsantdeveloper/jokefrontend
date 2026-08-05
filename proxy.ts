@@ -1,7 +1,6 @@
-// proxy.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL!; // e.g. https://api.yourapp.com
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -12,8 +11,7 @@ export async function proxy(request: NextRequest) {
     return redirectToLogin(request);
   }
 
-  // Validate the token + get role by calling your backend session endpoint.
-  // Forwarding the cookie ensures this is the same check the API itself trusts.
+  // get session from backend to validate the access token and check the role
   const res = await fetch(`${BACKEND_URL}/auth/session`, {
     headers: { cookie: `accessToken=${accessToken}` },
     cache: "no-store",
@@ -26,7 +24,7 @@ export async function proxy(request: NextRequest) {
   const { data: session } = await res.json();
 
   if (pathname.startsWith("/admin") && session?.role !== "ADMIN") {
-    // Authenticated, but not authorized
+    // authenticated, but not authorized
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
@@ -34,7 +32,7 @@ export async function proxy(request: NextRequest) {
 }
 
 function redirectToLogin(request: NextRequest) {
-  const loginUrl = new URL("/login", request.url);
+  const loginUrl = new URL("/auth/login", request.url);
   loginUrl.searchParams.set("from", request.nextUrl.pathname);
   return NextResponse.redirect(loginUrl);
 }
