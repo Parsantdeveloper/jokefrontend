@@ -1,6 +1,7 @@
 import { api } from '@/lib/axiosInstance'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { Toaster } from "@/components/ui/toast"
 
 export default async function AdminLayout({
   children,
@@ -30,5 +31,8 @@ export default async function AdminLayout({
     redirect('/auth/login')
   }
 
-  return <>{children}</>
+  return <>
+    <Toaster />
+  
+  {children}</>
 }
