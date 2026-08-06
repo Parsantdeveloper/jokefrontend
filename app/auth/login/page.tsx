@@ -8,9 +8,7 @@ import axios from "axios";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState(
-    ""
-  );
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -41,49 +39,45 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center text-black justify-center bg-zinc-100 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-black px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg"
+        className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-white shadow-lg"
       >
-        <h1 className="mb-6 text-center text-3xl font-bold">
-          Login
-        </h1>
+        <h1 className="mb-6 text-center text-3xl font-bold">Login</h1>
 
         <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium">
+          <label className="mb-2 block text-sm font-medium text-zinc-300">
             Email
           </label>
-
           <input
             type="email"
-            className="w-full rounded-md border px-3 py-2 outline-none focus:border-black"
+            className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-white outline-none placeholder:text-zinc-500 focus:border-zinc-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
         <div className="mb-5">
-          <label className="mb-2 block text-sm font-medium">
+          <label className="mb-2 block text-sm font-medium text-zinc-300">
             Password
           </label>
-
           <input
             type="password"
-            className="w-full rounded-md border px-3 py-2 outline-none focus:border-black"
+            className="w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-white outline-none placeholder:text-zinc-500 focus:border-zinc-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
         {error && (
-          <p className="mb-4 text-sm text-red-500">{error}</p>
+          <p className="mb-4 text-sm text-red-400">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-black py-2 text-white transition hover:bg-zinc-800 disabled:opacity-50"
+          className="w-full rounded-md bg-white py-2 font-medium text-black transition hover:bg-zinc-200 disabled:opacity-50"
         >
           {loading ? "Signing In..." : "Login"}
         </button>
