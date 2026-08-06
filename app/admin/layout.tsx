@@ -1,38 +1,30 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { api } from '@/lib/axiosInstance'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { Toaster } from "@/components/ui/toast"
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('accessToken')?.value
+export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const router = useRouter()
+  const [status, setStatus] = useState<'checking' | 'ok'>('checking')
 
-  if (!accessToken) {
-    redirect('/auth/login')
-  }
+  useEffect(() => {
+    let ignore = false
 
-  try {
-    const { data } = await api.get('/auth/session', {
-      headers: {
-        Cookie: `accessToken=${accessToken}`,
-      },
-    })
+    api.get<{ data?: { role?: string }; role?: string }>('/auth/session')
+      .then(({ data }) => {
+        if (ignore) return
+        const role = data.data?.role ?? data.role
+        if (role !== 'ADMIN') router.replace('/unauthorized')
+        else setStatus('ok')
+      })
+      .catch(() => {
+        if (!ignore) router.replace('/auth/login')
+      })
 
-    const role = data?.data?.role ?? data?.role
-    if (role !== 'ADMIN') {
-      redirect('/unauthorized')
-    }
-  } catch (error) {
-    // Any failure (network, 401, etc.) sends the user to login
-    redirect('/auth/login')
-  }
+    return () => { ignore = true }
+  }, [router])
 
-  return <>
-    <Toaster />
-  
-  {children}</>
+  if (status === 'checking') return null
+  return <>{children}</>
 }
