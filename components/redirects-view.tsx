@@ -10,7 +10,7 @@ import {
   Plus,
   TriangleAlert,
 } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@/components/ui/toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,13 @@ import {
 } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -111,8 +118,6 @@ export function RedirectsView() {
     [redirects, query],
   )
 
-  const activeCount = redirects.filter((redirect) => redirect.active).length
-
   function openCreate() {
     setEditing(null)
     setFromPath('')
@@ -148,12 +153,20 @@ export function RedirectsView() {
         })
       }
       setDialogOpen(false)
-      toast.success(editing ? 'Redirect updated' : 'Redirect created')
+      toast.add({
+        title: editing ? 'Redirect updated' : 'Redirect created',
+        description: editing
+          ? 'The redirect rule has been modified.'
+          : 'A new redirect is now active.',
+      })
       await loadRedirects()
     } catch (cause) {
-      toast.error(
-        cause instanceof Error ? cause.message : 'Unable to save redirect',
-      )
+      const message =
+        cause instanceof Error ? cause.message : 'Unable to save redirect'
+      toast.add({
+        title: 'Error',
+        description: message,
+      })
     } finally {
       setSaving(false)
     }
@@ -162,7 +175,10 @@ export function RedirectsView() {
   async function copyPath(path: string) {
     await navigator.clipboard.writeText(path)
     setCopied(path)
-    toast.success('Path copied')
+    toast.add({
+      title: 'Path copied',
+      description: path,
+    })
     window.setTimeout(() => setCopied(''), 1600)
   }
 
@@ -175,7 +191,6 @@ export function RedirectsView() {
           detail="Across all routes"
           icon={Link2}
         />
-     
         <MetricCard
           label="Redirect type"
           value="307"
@@ -198,8 +213,6 @@ export function RedirectsView() {
         </CardHeader>
 
         <CardContent className="p-0">
-         
-
           {error ? (
             <div className="p-4">
               <Alert variant="destructive">
@@ -257,7 +270,7 @@ export function RedirectsView() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {redirect.type.replace('TEMPORARY_', '')}
+                        {redirect.type.replace('TEMPORARY_', '').replace('PERMANENT_', '')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -327,11 +340,22 @@ export function RedirectsView() {
               <>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="redirect-type">Type</Label>
-                  <Input
-                    id="redirect-type"
+                  <Select
                     value={type}
-                    onChange={(event) => setType(event.target.value)}
-                  />
+                    onValueChange={(value) => setType(value!)}
+                  >
+                    <SelectTrigger id="redirect-type">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent className="w-48">
+                      <SelectItem value="TEMPORARY_307">
+                        Temporary (307)
+                      </SelectItem>
+                      <SelectItem value="PERMANENT_308">
+                        Permanent (308)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="redirect-active">Active</Label>

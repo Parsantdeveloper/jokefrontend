@@ -20,12 +20,13 @@ export async function proxy(request: NextRequest) {
   try {
     const res = await fetch(
       `${API_URL}/redirect/lookup?path=${encodeURIComponent(pathname)}`,
+      {
+        next: { revalidate: 60 },
+      }
     );
 
     if (!res.ok) {
-      // fail open: if the redirect service is down, let the request
-      // through to the page — worst case it 404s, which is recoverable,
-      // vs. blocking every joke page load on a flaky dependency.
+     // If the API call fails, we don't want to block the request; just continue as normal.
       return NextResponse.next();
     }
 
