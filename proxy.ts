@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { redis } from "@/lib/redis";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface CachedRedirect {
+  to: string;
+  status: 307 | 308;
+}
 
 interface ApiEnvelope<T> {
   status: number;
@@ -12,30 +18,35 @@ type RedirectLookupResult =
   | { redirect: true; to: string; status: 307 | 308 }
   | { redirect: false };
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  let lookup: RedirectLookupResult;
-
+async function lookupFromApi(pathname: string): Promise<RedirectLookupResult> {
   try {
     const res = await fetch(
       `${API_URL}/redirect/lookup?path=${encodeURIComponent(pathname)}`,
-      {
-        next: { revalidate: 60 },
-      }
     );
-
-    if (!res.ok) {
-     // If the API call fails, we don't want to block the request; just continue as normal.
-      return NextResponse.next();
-    }
-
+    if (!res.ok) return { redirect: false };
     const json = (await res.json()) as ApiEnvelope<RedirectLookupResult>;
-    lookup = json.data;
+    return json.data;
   } catch {
-    return NextResponse.next();
+    return { redirect: false };
+  }
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  try {
+    const cached = await redis.get<CachedRedirect>(`redirect:${pathname}`);
+    if (cached) {
+      return NextResponse.redirect(new URL(cached.to, request.url), cached.status);
+    }
+  } catch (error) {
+    // Redis being down shouldn't take the site down — fall through to
+    // the API, which is slower but authoritative.
+    console.error(`Redis lookup failed for "${pathname}":`, error);
   }
 
+  // Cache miss (genuinely no redirect, or not synced) — ask the backend.
+  const lookup = await lookupFromApi(pathname);
   if (lookup.redirect) {
     return NextResponse.redirect(new URL(lookup.to, request.url), lookup.status);
   }
@@ -44,7 +55,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Only run this check on joke detail pages — not /jokes (the list),
-  // not /admin, not static assets.
   matcher: "/jokes/:slug((?!$).*)",
 };
