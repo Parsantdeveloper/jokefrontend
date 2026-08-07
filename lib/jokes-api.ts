@@ -24,7 +24,7 @@ export async function getAllJokes(): Promise<Joke[]> {
 
 export async function getJokeBySlug(slug: string): Promise<Joke | null> {
   const res = await fetch(`${API_URL}/joke/${encodeURIComponent(slug)}`, {
-    ...fetchOptions(),
+     headers: { 'Content-Type': 'application/json' },
     next: { revalidate: 86400 },
   });
 
