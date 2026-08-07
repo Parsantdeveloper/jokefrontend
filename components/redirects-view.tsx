@@ -59,9 +59,8 @@ import {
   createRedirect,
   getRedirects,
   updateRedirect,
-  type Redirect,
 } from '@/lib/redirects-api'
-
+import {Redirect } from '@/types/types'
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('en', {
     month: 'short',

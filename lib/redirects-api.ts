@@ -1,5 +1,5 @@
 import { api } from "./axiosInstance";
-import {RedirectsResponse,RedirectResponse,CreateRedirectInput,UpdateRedirectInput } from "../types/types";
+import {Redirect,RedirectsMeta,RedirectsResponse,RedirectResponse,CreateRedirectInput,UpdateRedirectInput } from "../types/types";
 
 
 
