@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getJokeBySlug } from "@/lib/jokes-api";
+import { getAllJokes, getJokeBySlug } from "@/lib/jokes-api";
 
 export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const jokes = await getAllJokes();
+  return jokes.map((joke) => ({ slug: joke.slug }));
 }
 
 export default async function JokePage({ params }: PageProps) {

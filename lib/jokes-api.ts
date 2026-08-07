@@ -13,7 +13,7 @@ const fetchOptions = (init?: RequestInit): RequestInit => ({
 
 export async function getAllJokes(): Promise<Joke[]> {
   const res = await fetch(`${API_URL}/joke`, {
-    ...fetchOptions(),
+    headers: { 'Content-Type': 'application/json' },
     next: { revalidate: 86400 },
   });
 
